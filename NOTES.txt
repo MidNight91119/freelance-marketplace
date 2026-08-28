@@ -1,0 +1,9 @@
+# Knowledge base
+
+- Why go run ./cmd/api and not go run main.go or ./cmd/api/main.go?
+>> if tommorrow I add routes or setupRouter or config it won't compile/build. go builds in packages. 
+- Think in packages not files
+
+- Why use /internal? so nothing outside internal can import it and go enforces that by it's compiler.
+  - I want to reserve right to rewrite it
+-  
