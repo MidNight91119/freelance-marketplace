@@ -14,7 +14,7 @@ func createRandomUser(t *testing.T) User {
 	arg := CreateUserParams{
 		Name:           util.RandomName(),
 		Email:          util.RandomEmail(),
-		HashedPassword: util.RandomString(32),
+		HashedPassword: util.RandomString(8),
 		Role:           randomRole(),
 	}
 
@@ -42,7 +42,7 @@ func TestCreateUserDuplicateEmail(t *testing.T) {
 	arg := CreateUserParams{
 		Name:           util.RandomName(),
 		Email:          user1.Email,
-		HashedPassword: util.RandomString(32),
+		HashedPassword: util.RandomString(8),
 		Role:           randomRole(),
 	}
 
