@@ -28,7 +28,7 @@ func NewServer(config util.Config, store *db.Queries) (*Server, error) {
 		config:     config,
 		store:      store,
 		tokenMaker: tokenMaker,
-		validate: validator.New(),
+		validate:   validator.New(),
 	}
 
 	server.setupRouter()
@@ -37,7 +37,10 @@ func NewServer(config util.Config, store *db.Queries) (*Server, error) {
 
 func (server *Server) setupRouter() {
 	mux := http.NewServeMux()
+
 	mux.HandleFunc("POST /api/auth/signup", server.signup)
+	mux.HandleFunc("POST /api/auth/login", server.login)
+
 	server.router = mux
 }
 
