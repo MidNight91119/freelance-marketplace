@@ -40,6 +40,7 @@ func (server *Server) setupRouter() {
 
 	mux.HandleFunc("POST /api/auth/signup", server.signup)
 	mux.HandleFunc("POST /api/auth/login", server.login)
+	mux.Handle("GET /api/auth/me", server.authMiddleware(http.HandlerFunc(server.getMe)))
 
 	server.router = mux
 }

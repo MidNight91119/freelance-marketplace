@@ -8,6 +8,7 @@ import (
 	"time"
 
 	db "github.com/MidNight91119/freelance-marketplace/internal/db/sqlc"
+	"github.com/MidNight91119/freelance-marketplace/internal/token"
 	"github.com/MidNight91119/freelance-marketplace/internal/util"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -128,10 +129,31 @@ func (server *Server) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rsp := loginResponse{
-		AccessToken: accessToken,
+		AccessToken:          accessToken,
 		AccessTokenExpiresAt: payload.ExpiredAt,
-		User: newUserResponse(user),
+		User:                 newUserResponse(user),
 	}
 
 	writeJSON(w, http.StatusOK, rsp)
+}
+
+func (server *Server) getMe(w http.ResponseWriter, r *http.Request) {
+	payload, ok := r.Context().Value(authPayloadKey).(*token.Payload)
+	if !ok {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "middleware not working")
+		return
+	}
+
+	user, err := server.store.GetUserByEmail(r.Context(), payload.Email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			writeError(w, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid email or password")
+			return
+		}
+		log.Printf("getMe: get user failed: %v", err)
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, newUserResponse(user))
 }
