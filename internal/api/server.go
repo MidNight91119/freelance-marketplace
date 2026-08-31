@@ -7,12 +7,14 @@ import (
 	db "github.com/MidNight91119/freelance-marketplace/internal/db/sqlc"
 	"github.com/MidNight91119/freelance-marketplace/internal/token"
 	"github.com/MidNight91119/freelance-marketplace/internal/util"
+	"github.com/go-playground/validator/v10"
 )
 
 type Server struct {
 	config     util.Config
 	store      *db.Queries
 	tokenMaker token.Maker
+	validate   *validator.Validate
 	router     *http.ServeMux
 }
 
@@ -26,6 +28,7 @@ func NewServer(config util.Config, store *db.Queries) (*Server, error) {
 		config:     config,
 		store:      store,
 		tokenMaker: tokenMaker,
+		validate: validator.New(),
 	}
 
 	server.setupRouter()
