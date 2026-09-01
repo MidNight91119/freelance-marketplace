@@ -12,13 +12,13 @@ import (
 
 type Server struct {
 	config     util.Config
-	store      *db.Queries
+	store      db.Store
 	tokenMaker token.Maker
 	validate   *validator.Validate
 	router     *http.ServeMux
 }
 
-func NewServer(config util.Config, store *db.Queries) (*Server, error) {
+func NewServer(config util.Config, store db.Store) (*Server, error) {
 	tokenMaker, err := token.NewJWTMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -40,6 +40,9 @@ func (server *Server) setupRouter() {
 
 	mux.HandleFunc("POST /api/auth/signup", server.signup)
 	mux.HandleFunc("POST /api/auth/login", server.login)
+	// mux.Handle("POST /api/projects", server.authMiddleware(http.HandlerFunc(server.projects)))
+
+	// only to test auth middleware
 	mux.Handle("GET /api/auth/me", server.authMiddleware(http.HandlerFunc(server.getMe)))
 
 	server.router = mux
