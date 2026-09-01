@@ -10,6 +10,50 @@ import (
 	"time"
 )
 
+type ProjectStatus string
+
+const (
+	ProjectStatusOpen       ProjectStatus = "open"
+	ProjectStatusInProgress ProjectStatus = "in_progress"
+	ProjectStatusCompleted  ProjectStatus = "completed"
+	ProjectStatusCancelled  ProjectStatus = "cancelled"
+)
+
+func (e *ProjectStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ProjectStatus(s)
+	case string:
+		*e = ProjectStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ProjectStatus: %T", src)
+	}
+	return nil
+}
+
+type NullProjectStatus struct {
+	ProjectStatus ProjectStatus `json:"project_status"`
+	Valid         bool          `json:"valid"` // Valid is true if ProjectStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullProjectStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ProjectStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ProjectStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullProjectStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ProjectStatus), nil
+}
+
 type Roles string
 
 const (
@@ -50,6 +94,20 @@ func (ns NullRoles) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.Roles), nil
+}
+
+type Project struct {
+	ID          int64         `json:"id"`
+	ClientID    int64         `json:"client_id"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	Category    string        `json:"category"`
+	BudgetMin   int64         `json:"budget_min"`
+	BudgetMax   int64         `json:"budget_max"`
+	Status      ProjectStatus `json:"status"`
+	Deadline    time.Time     `json:"deadline"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
 }
 
 type User struct {
