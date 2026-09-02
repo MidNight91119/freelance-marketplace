@@ -47,6 +47,7 @@ func (server *Server) setupRouter() {
 	mux.HandleFunc("POST /api/auth/login", server.login)
 	
 	mux.Handle("POST /api/projects", server.authMiddleware(server.requireRole(http.HandlerFunc(server.createProject), roleClient)))
+	mux.Handle("GET /api/projects", server.authMiddleware(http.HandlerFunc(server.listProjects)))
 
 	// only to test auth middleware
 	mux.Handle("GET /api/auth/me", server.authMiddleware(http.HandlerFunc(server.getMe)))

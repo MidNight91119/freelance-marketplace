@@ -3,9 +3,11 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"time"
 
 	db "github.com/MidNight91119/freelance-marketplace/internal/db/sqlc"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type createProjectRequest struct {
@@ -91,4 +93,46 @@ func (server *Server) createProject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusCreated, newProjectResponse(project))
+}
+
+func (server *Server) listProjects(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+
+	category := q.Get("category")
+	arg := db.ListProjectsParams{
+		Category: pgtype.Text{
+			String: category,
+			Valid:  category != "",
+		},
+	}
+	if s := q.Get("minBudget"); s != "" {
+		n, err := strconv.ParseInt(s, 10, 64)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "minBudget must be a number")
+			return
+		}
+		arg.MinBudget = pgtype.Int8{
+			Int64: n,
+			Valid: true,
+		}
+	}
+	if s := q.Get("maxBudget"); s != "" {
+		n, err := strconv.ParseInt(s, 10, 64)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "maxBudget must be a number")
+			return
+		}
+		arg.MaxBudget = pgtype.Int8{
+			Int64: n,
+			Valid: true,
+		}
+	}
+
+	projects, err := server.store.ListProjects(r.Context(), arg)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, projects)
 }

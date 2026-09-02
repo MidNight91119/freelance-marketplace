@@ -8,6 +8,8 @@ package db
 import (
 	"context"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createProject = `-- name: CreateProject :one
@@ -59,4 +61,69 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const listProjects = `-- name: ListProjects :many
+SELECT p.id, p.client_id, p.title, p.description, p.category, p.budget_min, p.budget_max, p.status, p.deadline, p.created_at, p.updated_at, u.name AS client_name
+FROM projects p
+JOIN users u ON u.id = p.client_id
+WHERE p.status = 'open'
+  AND ($1::varchar IS NULL OR p.category = $1)
+  AND ($2::bigint IS NULL OR p.budget_max >= $2)
+  AND ($3::bigint IS NULL OR p.budget_min <= $3)
+ORDER BY p.created_at DESC
+`
+
+type ListProjectsParams struct {
+	Category  pgtype.Text `json:"category"`
+	MinBudget pgtype.Int8 `json:"min_budget"`
+	MaxBudget pgtype.Int8 `json:"max_budget"`
+}
+
+type ListProjectsRow struct {
+	ID          int64         `json:"id"`
+	ClientID    int64         `json:"client_id"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	Category    string        `json:"category"`
+	BudgetMin   int64         `json:"budget_min"`
+	BudgetMax   int64         `json:"budget_max"`
+	Status      ProjectStatus `json:"status"`
+	Deadline    time.Time     `json:"deadline"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
+	ClientName  string        `json:"client_name"`
+}
+
+func (q *Queries) ListProjects(ctx context.Context, arg ListProjectsParams) ([]ListProjectsRow, error) {
+	rows, err := q.db.Query(ctx, listProjects, arg.Category, arg.MinBudget, arg.MaxBudget)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListProjectsRow{}
+	for rows.Next() {
+		var i ListProjectsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ClientID,
+			&i.Title,
+			&i.Description,
+			&i.Category,
+			&i.BudgetMin,
+			&i.BudgetMax,
+			&i.Status,
+			&i.Deadline,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ClientName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
