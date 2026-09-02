@@ -23,7 +23,7 @@ INSERT INTO "users" (
 type CreateUserParams struct {
 	Name           string `json:"name"`
 	Email          string `json:"email"`
-	HashedPassword string `json:"hashed_password"`
+	HashedPassword string `json:"hashedPassword"`
 	Role           Roles  `json:"role"`
 }
 

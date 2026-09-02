@@ -32,7 +32,7 @@ func (e *ProjectStatus) Scan(src interface{}) error {
 }
 
 type NullProjectStatus struct {
-	ProjectStatus ProjectStatus `json:"project_status"`
+	ProjectStatus ProjectStatus `json:"projectStatus"`
 	Valid         bool          `json:"valid"` // Valid is true if ProjectStatus is not NULL
 }
 
@@ -98,23 +98,23 @@ func (ns NullRoles) Value() (driver.Value, error) {
 
 type Project struct {
 	ID          int64         `json:"id"`
-	ClientID    int64         `json:"client_id"`
+	ClientID    int64         `json:"clientId"`
 	Title       string        `json:"title"`
 	Description string        `json:"description"`
 	Category    string        `json:"category"`
-	BudgetMin   int64         `json:"budget_min"`
-	BudgetMax   int64         `json:"budget_max"`
+	BudgetMin   int64         `json:"budgetMin"`
+	BudgetMax   int64         `json:"budgetMax"`
 	Status      ProjectStatus `json:"status"`
 	Deadline    time.Time     `json:"deadline"`
-	CreatedAt   time.Time     `json:"created_at"`
-	UpdatedAt   time.Time     `json:"updated_at"`
+	CreatedAt   time.Time     `json:"createdAt"`
+	UpdatedAt   time.Time     `json:"updatedAt"`
 }
 
 type User struct {
 	ID             int64     `json:"id"`
 	Name           string    `json:"name"`
 	Email          string    `json:"email"`
-	HashedPassword string    `json:"hashed_password"`
+	HashedPassword string    `json:"hashedPassword"`
 	Role           Roles     `json:"role"`
-	CreatedAt      time.Time `json:"created_at"`
+	CreatedAt      time.Time `json:"createdAt"`
 }

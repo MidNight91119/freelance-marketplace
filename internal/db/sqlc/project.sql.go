@@ -27,12 +27,12 @@ INSERT INTO "projects" (
 `
 
 type CreateProjectParams struct {
-	ClientID    int64     `json:"client_id"`
+	ClientID    int64     `json:"clientId"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Category    string    `json:"category"`
-	BudgetMin   int64     `json:"budget_min"`
-	BudgetMax   int64     `json:"budget_max"`
+	BudgetMin   int64     `json:"budgetMin"`
+	BudgetMax   int64     `json:"budgetMax"`
 	Deadline    time.Time `json:"deadline"`
 }
 
@@ -76,23 +76,23 @@ ORDER BY p.created_at DESC
 
 type ListProjectsParams struct {
 	Category  pgtype.Text `json:"category"`
-	MinBudget pgtype.Int8 `json:"min_budget"`
-	MaxBudget pgtype.Int8 `json:"max_budget"`
+	MinBudget pgtype.Int8 `json:"minBudget"`
+	MaxBudget pgtype.Int8 `json:"maxBudget"`
 }
 
 type ListProjectsRow struct {
 	ID          int64         `json:"id"`
-	ClientID    int64         `json:"client_id"`
+	ClientID    int64         `json:"clientId"`
 	Title       string        `json:"title"`
 	Description string        `json:"description"`
 	Category    string        `json:"category"`
-	BudgetMin   int64         `json:"budget_min"`
-	BudgetMax   int64         `json:"budget_max"`
+	BudgetMin   int64         `json:"budgetMin"`
+	BudgetMax   int64         `json:"budgetMax"`
 	Status      ProjectStatus `json:"status"`
 	Deadline    time.Time     `json:"deadline"`
-	CreatedAt   time.Time     `json:"created_at"`
-	UpdatedAt   time.Time     `json:"updated_at"`
-	ClientName  string        `json:"client_name"`
+	CreatedAt   time.Time     `json:"createdAt"`
+	UpdatedAt   time.Time     `json:"updatedAt"`
+	ClientName  string        `json:"clientName"`
 }
 
 func (q *Queries) ListProjects(ctx context.Context, arg ListProjectsParams) ([]ListProjectsRow, error) {
