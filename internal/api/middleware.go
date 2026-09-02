@@ -3,7 +3,10 @@ package api
 import (
 	"context"
 	"net/http"
+	"slices"
 	"strings"
+
+	"github.com/MidNight91119/freelance-marketplace/internal/token"
 )
 
 type contextKey string
@@ -13,6 +16,11 @@ const (
 	authHeaderKey             = "authorization"
 	authPayloadKey contextKey = "auth_payload"
 )
+
+func payloadFrom(r *http.Request) (*token.Payload, bool) {
+	payload, ok := r.Context().Value(authPayloadKey).(*token.Payload)
+	return payload, ok
+}
 
 func (server *Server) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -42,5 +50,22 @@ func (server *Server) authMiddleware(next http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), authPayloadKey, payload)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (server *Server) requireRole(next http.Handler, allowed ...string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		payload, ok := payloadFrom(r)
+		if !ok {
+			writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+			return
+		}
+
+		if !slices.Contains(allowed, payload.Role) {
+			writeError(w, http.StatusForbidden, "FORBIDDEN", "you are not allowed to perform this action")
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }

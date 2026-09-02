@@ -10,6 +10,11 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+const (
+	roleClient     = string(db.RolesClient)
+	roleFreelancer = string(db.RolesFreelancer)
+)
+
 type Server struct {
 	config     util.Config
 	store      db.Store
@@ -40,7 +45,8 @@ func (server *Server) setupRouter() {
 
 	mux.HandleFunc("POST /api/auth/signup", server.signup)
 	mux.HandleFunc("POST /api/auth/login", server.login)
-	// mux.Handle("POST /api/projects", server.authMiddleware(http.HandlerFunc(server.projects)))
+	
+	mux.Handle("POST /api/projects", server.authMiddleware(server.requireRole(http.HandlerFunc(server.createProject), roleClient)))
 
 	// only to test auth middleware
 	mux.Handle("GET /api/auth/me", server.authMiddleware(http.HandlerFunc(server.getMe)))
