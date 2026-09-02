@@ -111,7 +111,8 @@ type listProjectResponse struct {
 }
 
 func newlistProjectResponse(projects []db.ListProjectsRow) []listProjectResponse {
-	var newProjects []listProjectResponse
+	// make (not `var`) so an empty result marshals to [] rather than null
+	newProjects := make([]listProjectResponse, 0, len(projects))
 	for _, project := range projects {
 		newProjects = append(newProjects, listProjectResponse{
 			ID:            project.ID,
