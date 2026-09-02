@@ -32,8 +32,12 @@ mock:
 test:
 	go test -v -cover -short ./...
 
+# end-to-end smoke test against a running server (make server, in another terminal)
+smoke:
+	./scripts/smoke.sh
+
 server:
 	go run ./cmd/api
 
 
-.PHONY: postgres createdb dropdb migrateup migratedown db_schema sqlc mock test server new_migration
+.PHONY: postgres createdb dropdb migrateup migratedown db_schema sqlc mock test smoke server new_migration

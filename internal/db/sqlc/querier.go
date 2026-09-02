@@ -15,6 +15,7 @@ type Querier interface {
 	GetProject(ctx context.Context, id int64) (Project, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	ListProjects(ctx context.Context, arg ListProjectsParams) ([]ListProjectsRow, error)
+	ListProposalsByProject(ctx context.Context, projectID int64) ([]ListProposalsByProjectRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

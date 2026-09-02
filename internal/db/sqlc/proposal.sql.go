@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createProposal = `-- name: CreateProposal :one
@@ -50,4 +51,56 @@ func (q *Queries) CreateProposal(ctx context.Context, arg CreateProposalParams) 
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const listProposalsByProject = `-- name: ListProposalsByProject :many
+SELECT pr.id, pr.project_id, pr.freelancer_id, pr.cover_letter, pr.proposed_price, pr.estimated_duration_days, pr.status, pr.created_at, pr.updated_at, u.name AS freelancer_name
+FROM proposals pr
+JOIN users u ON u.id = pr.freelancer_id
+WHERE pr.project_id = $1
+ORDER BY pr.created_at DESC
+`
+
+type ListProposalsByProjectRow struct {
+	ID                    int64          `json:"id"`
+	ProjectID             int64          `json:"projectId"`
+	FreelancerID          int64          `json:"freelancerId"`
+	CoverLetter           string         `json:"coverLetter"`
+	ProposedPrice         int64          `json:"proposedPrice"`
+	EstimatedDurationDays int64          `json:"estimatedDurationDays"`
+	Status                ProposalStatus `json:"status"`
+	CreatedAt             time.Time      `json:"createdAt"`
+	UpdatedAt             time.Time      `json:"updatedAt"`
+	FreelancerName        string         `json:"freelancerName"`
+}
+
+func (q *Queries) ListProposalsByProject(ctx context.Context, projectID int64) ([]ListProposalsByProjectRow, error) {
+	rows, err := q.db.Query(ctx, listProposalsByProject, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListProposalsByProjectRow{}
+	for rows.Next() {
+		var i ListProposalsByProjectRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProjectID,
+			&i.FreelancerID,
+			&i.CoverLetter,
+			&i.ProposedPrice,
+			&i.EstimatedDurationDays,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.FreelancerName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

@@ -130,3 +130,18 @@ func (mr *MockStoreMockRecorder) ListProjects(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProjects", reflect.TypeOf((*MockStore)(nil).ListProjects), ctx, arg)
 }
+
+// ListProposalsByProject mocks base method.
+func (m *MockStore) ListProposalsByProject(ctx context.Context, projectID int64) ([]db.ListProposalsByProjectRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListProposalsByProject", ctx, projectID)
+	ret0, _ := ret[0].([]db.ListProposalsByProjectRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListProposalsByProject indicates an expected call of ListProposalsByProject.
+func (mr *MockStoreMockRecorder) ListProposalsByProject(ctx, projectID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProposalsByProject", reflect.TypeOf((*MockStore)(nil).ListProposalsByProject), ctx, projectID)
+}

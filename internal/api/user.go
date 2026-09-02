@@ -41,7 +41,7 @@ func newUserResponse(user db.User) userResponse {
 
 type loginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
+	Password string `json:"password" validate:"required"`
 }
 
 type loginResponse struct {

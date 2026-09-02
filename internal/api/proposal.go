@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	db "github.com/MidNight91119/freelance-marketplace/internal/db/sqlc"
 	"github.com/jackc/pgx/v5"
@@ -14,7 +15,32 @@ import (
 type createProposalRequest struct {
 	CoverLetter           string `json:"coverLetter" validate:"required"`
 	ProposedPrice         int64  `json:"proposedPrice" validate:"required,gt=0"`
-	EstimatedDurationDays int64  `json:"estimatedDurationDays" validate:"required,gt=0"`
+	EstimatedDurationDays int64  `json:"estimatedDuration" validate:"required,gt=0"`
+}
+
+// matches the field list the spec defines for GET /api/projects/:projectId/proposals
+type proposalResponse struct {
+	ProposalID        int64     `json:"proposalId"`
+	FreelancerID      int64     `json:"freelancerId"`
+	FreelancerName    string    `json:"freelancerName"`
+	CoverLetter       string    `json:"coverLetter"`
+	ProposedPrice     int64     `json:"proposedPrice"`
+	EstimatedDuration int64     `json:"estimatedDuration"`
+	Status            string    `json:"status"`
+	CreatedAt         time.Time `json:"createdAt"`
+}
+
+func newProposalResponse(row db.ListProposalsByProjectRow) proposalResponse {
+	return proposalResponse{
+		ProposalID:        row.ID,
+		FreelancerID:      row.FreelancerID,
+		FreelancerName:    row.FreelancerName,
+		CoverLetter:       row.CoverLetter,
+		ProposedPrice:     row.ProposedPrice,
+		EstimatedDuration: row.EstimatedDurationDays,
+		Status:            string(row.Status),
+		CreatedAt:         row.CreatedAt,
+	}
 }
 
 func (server *Server) createProposal(w http.ResponseWriter, r *http.Request) {
@@ -74,4 +100,46 @@ func (server *Server) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusCreated, proposal)
+}
+
+func (server *Server) listProposalsByProject(w http.ResponseWriter, r *http.Request) {
+	projectId, err := strconv.ParseInt(r.PathValue("projectId"), 10, 64)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid project id")
+		return
+	}
+
+	payload, ok := payloadFrom(r)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "invalid or expired access token")
+		return
+	}
+
+	project, err := server.store.GetProject(r.Context(), projectId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "PROJECT_NOT_FOUND", "does not exist")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+		return
+	}
+
+	if project.ClientID != payload.UserID {
+		writeError(w, http.StatusForbidden, "FORBIDDEN", "project does not belong to you")
+		return
+	}
+
+	rows, err := server.store.ListProposalsByProject(r.Context(), projectId)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+		return
+	}
+
+	rsp := make([]proposalResponse, len(rows))
+	for i, row := range rows {
+		rsp[i] = newProposalResponse(row)
+	}
+
+	writeJSON(w, http.StatusOK, rsp)
 }
