@@ -95,36 +95,37 @@ func (server *Server) createProject(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, newProjectResponse(project))
 }
 
-
 type listProjectResponse struct {
-	ID          int64     `json:"id"`
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Category    string    `json:"category"`
-	BudgetMin   int64     `json:"budgetMin"`
-	BudgetMax   int64     `json:"budgetMax"`
-	Deadline    time.Time `json:"deadline"`
-	Status      string    `json:"status"`
-	ClientName  string    `json:"clientName"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	ID            int64     `json:"id"`
+	Title         string    `json:"title"`
+	Description   string    `json:"description"`
+	Category      string    `json:"category"`
+	BudgetMin     int64     `json:"budgetMin"`
+	BudgetMax     int64     `json:"budgetMax"`
+	Deadline      time.Time `json:"deadline"`
+	Status        string    `json:"status"`
+	ClientName    string    `json:"clientName"`
+	ProposalCount int64     `json:"proposalCount"`
+	CreatedAt     time.Time `json:"createdAt"`
+	UpdatedAt     time.Time `json:"updatedAt"`
 }
 
 func newlistProjectResponse(projects []db.ListProjectsRow) []listProjectResponse {
 	var newProjects []listProjectResponse
 	for _, project := range projects {
 		newProjects = append(newProjects, listProjectResponse{
-			ID: project.ID,
-			Title: project.Title,
-			Description: project.Description,
-			Category: project.Category,
-			BudgetMin: project.BudgetMin,
-			BudgetMax: project.BudgetMax,
-			Deadline: project.Deadline,
-			Status: string(project.Status),
-			ClientName: project.ClientName,
-			CreatedAt: project.CreatedAt,
-			UpdatedAt: project.UpdatedAt,
+			ID:            project.ID,
+			Title:         project.Title,
+			Description:   project.Description,
+			Category:      project.Category,
+			BudgetMin:     project.BudgetMin,
+			BudgetMax:     project.BudgetMax,
+			Deadline:      project.Deadline,
+			Status:        string(project.Status),
+			ClientName:    project.ClientName,
+			ProposalCount: project.ProposalCount,
+			CreatedAt:     project.CreatedAt,
+			UpdatedAt:     project.UpdatedAt,
 		})
 	}
 	return newProjects

@@ -64,13 +64,15 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 }
 
 const listProjects = `-- name: ListProjects :many
-SELECT p.id, p.client_id, p.title, p.description, p.category, p.budget_min, p.budget_max, p.status, p.deadline, p.created_at, p.updated_at, u.name AS client_name
+SELECT p.id, p.client_id, p.title, p.description, p.category, p.budget_min, p.budget_max, p.status, p.deadline, p.created_at, p.updated_at, u.name AS client_name, COUNT(pr.id) AS proposal_count
 FROM projects p
 JOIN users u ON u.id = p.client_id
+LEFT JOIN proposals pr ON pr.project_id = p.id
 WHERE p.status = 'open'
   AND ($1::varchar IS NULL OR p.category = $1)
   AND ($2::bigint IS NULL OR p.budget_max >= $2)
   AND ($3::bigint IS NULL OR p.budget_min <= $3)
+GROUP BY p.id, u.name
 ORDER BY p.created_at DESC
 `
 
@@ -81,18 +83,19 @@ type ListProjectsParams struct {
 }
 
 type ListProjectsRow struct {
-	ID          int64         `json:"id"`
-	ClientID    int64         `json:"clientId"`
-	Title       string        `json:"title"`
-	Description string        `json:"description"`
-	Category    string        `json:"category"`
-	BudgetMin   int64         `json:"budgetMin"`
-	BudgetMax   int64         `json:"budgetMax"`
-	Status      ProjectStatus `json:"status"`
-	Deadline    time.Time     `json:"deadline"`
-	CreatedAt   time.Time     `json:"createdAt"`
-	UpdatedAt   time.Time     `json:"updatedAt"`
-	ClientName  string        `json:"clientName"`
+	ID            int64         `json:"id"`
+	ClientID      int64         `json:"clientId"`
+	Title         string        `json:"title"`
+	Description   string        `json:"description"`
+	Category      string        `json:"category"`
+	BudgetMin     int64         `json:"budgetMin"`
+	BudgetMax     int64         `json:"budgetMax"`
+	Status        ProjectStatus `json:"status"`
+	Deadline      time.Time     `json:"deadline"`
+	CreatedAt     time.Time     `json:"createdAt"`
+	UpdatedAt     time.Time     `json:"updatedAt"`
+	ClientName    string        `json:"clientName"`
+	ProposalCount int64         `json:"proposalCount"`
 }
 
 func (q *Queries) ListProjects(ctx context.Context, arg ListProjectsParams) ([]ListProjectsRow, error) {
@@ -117,6 +120,7 @@ func (q *Queries) ListProjects(ctx context.Context, arg ListProjectsParams) ([]L
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.ClientName,
+			&i.ProposalCount,
 		); err != nil {
 			return nil, err
 		}
