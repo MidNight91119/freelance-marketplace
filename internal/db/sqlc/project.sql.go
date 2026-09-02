@@ -63,6 +63,31 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 	return i, err
 }
 
+const getProject = `-- name: GetProject :one
+SELECT id, client_id, title, description, category, budget_min, budget_max, status, deadline, created_at, updated_at FROM projects
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetProject(ctx context.Context, id int64) (Project, error) {
+	row := q.db.QueryRow(ctx, getProject, id)
+	var i Project
+	err := row.Scan(
+		&i.ID,
+		&i.ClientID,
+		&i.Title,
+		&i.Description,
+		&i.Category,
+		&i.BudgetMin,
+		&i.BudgetMax,
+		&i.Status,
+		&i.Deadline,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listProjects = `-- name: ListProjects :many
 SELECT p.id, p.client_id, p.title, p.description, p.category, p.budget_min, p.budget_max, p.status, p.deadline, p.created_at, p.updated_at, u.name AS client_name, COUNT(pr.id) AS proposal_count
 FROM projects p

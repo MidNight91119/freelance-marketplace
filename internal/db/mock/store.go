@@ -56,6 +56,21 @@ func (mr *MockStoreMockRecorder) CreateProject(ctx, arg any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProject", reflect.TypeOf((*MockStore)(nil).CreateProject), ctx, arg)
 }
 
+// CreateProposal mocks base method.
+func (m *MockStore) CreateProposal(ctx context.Context, arg db.CreateProposalParams) (db.Proposal, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateProposal", ctx, arg)
+	ret0, _ := ret[0].(db.Proposal)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateProposal indicates an expected call of CreateProposal.
+func (mr *MockStoreMockRecorder) CreateProposal(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProposal", reflect.TypeOf((*MockStore)(nil).CreateProposal), ctx, arg)
+}
+
 // CreateUser mocks base method.
 func (m *MockStore) CreateUser(ctx context.Context, arg db.CreateUserParams) (db.User, error) {
 	m.ctrl.T.Helper()
@@ -69,6 +84,21 @@ func (m *MockStore) CreateUser(ctx context.Context, arg db.CreateUserParams) (db
 func (mr *MockStoreMockRecorder) CreateUser(ctx, arg any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockStore)(nil).CreateUser), ctx, arg)
+}
+
+// GetProject mocks base method.
+func (m *MockStore) GetProject(ctx context.Context, id int64) (db.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProject", ctx, id)
+	ret0, _ := ret[0].(db.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProject indicates an expected call of GetProject.
+func (mr *MockStoreMockRecorder) GetProject(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProject", reflect.TypeOf((*MockStore)(nil).GetProject), ctx, id)
 }
 
 // GetUserByEmail mocks base method.

@@ -22,3 +22,8 @@ WHERE p.status = 'open'
   AND (sqlc.narg(max_budget)::bigint IS NULL OR p.budget_min <= sqlc.narg(max_budget))
 GROUP BY p.id, u.name
 ORDER BY p.created_at DESC;
+
+-- name: GetProject :one
+SELECT * FROM projects
+WHERE id = $1
+LIMIT 1;
