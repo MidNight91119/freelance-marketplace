@@ -79,13 +79,23 @@ check 401 "GET /me with wrong scheme"  "$BASE/api/auth/me" -H "Authorization: Ba
 echo
 echo "── projects ─────────────────────────────────────────"
 PROJ="{\"title\":\"Smoke $R\",\"description\":\"desc\",\"category\":\"Smoke$R\",\"budgetMin\":50000,\"budgetMax\":100000,\"deadline\":\"2026-12-15\"}"
-check 201 "client creates project"        -X POST "$BASE/api/projects" "${AUTH_A[@]}" "${JSON[@]}" -d "$PROJ"
 check 403 "freelancer creates project"    -X POST "$BASE/api/projects" "${AUTH_1[@]}" "${JSON[@]}" -d "$PROJ"
 check 401 "anonymous creates project"     -X POST "$BASE/api/projects" "${JSON[@]}" -d "$PROJ"
 check 400 "budgetMax below budgetMin"     -X POST "$BASE/api/projects" "${AUTH_A[@]}" "${JSON[@]}" -d "{\"title\":\"x\",\"description\":\"d\",\"category\":\"c\",\"budgetMin\":90000,\"budgetMax\":1000,\"deadline\":\"2026-12-15\"}"
 check 400 "deadline in the past"          -X POST "$BASE/api/projects" "${AUTH_A[@]}" "${JSON[@]}" -d "{\"title\":\"x\",\"description\":\"d\",\"category\":\"c\",\"budgetMin\":1000,\"budgetMax\":9000,\"deadline\":\"2020-01-01\"}"
 
-PID=$(get -X POST "$BASE/api/projects" "${AUTH_A[@]}" "${JSON[@]}" -d "$PROJ" | json_id)
+# one request: check the status code AND capture the id from the same response
+OUT=$(curl -s -w $'\n%{http_code}' -X POST "$BASE/api/projects" "${AUTH_A[@]}" "${JSON[@]}" -d "$PROJ")
+CODE=${OUT##*$'\n'}
+BODY=${OUT%$'\n'*}
+PID=$(echo "$BODY" | json_id)
+if [[ "$CODE" == "201" ]]; then
+  printf '  \033[32m✓\033[0m %-3s %s\n' "$CODE" "client creates project"
+  pass=$((pass+1))
+else
+  printf '  \033[31m✗\033[0m %-3s %s \033[2m(wanted 201)\033[0m\n      %s\n' "$CODE" "client creates project" "$BODY"
+  fail=$((fail+1))
+fi
 echo "  (working project id = $PID)"
 
 check 200 "list projects"                 "$BASE/api/projects" "${AUTH_1[@]}"
@@ -111,6 +121,29 @@ check 403 "OTHER CLIENT views proposals"   "$BASE/api/projects/$PID/proposals" "
 check 403 "freelancer views proposals"     "$BASE/api/projects/$PID/proposals" "${AUTH_1[@]}"
 check 401 "anonymous views proposals"      "$BASE/api/projects/$PID/proposals"
 check 404 "proposals of missing project"   "$BASE/api/projects/999999/proposals" "${AUTH_A[@]}"
+
+echo
+echo "── accepting a proposal (the transaction) ───────────"
+# grab the two proposal ids on the working project
+PROPS=$(get "$BASE/api/projects/$PID/proposals" "${AUTH_A[@]}")
+P1=$(echo "$PROPS" | tr '}' '\n' | sed -n 's/.*"proposalId":\([0-9]*\).*/\1/p' | head -1)
+P2=$(echo "$PROPS" | tr '}' '\n' | sed -n 's/.*"proposalId":\([0-9]*\).*/\1/p' | tail -1)
+echo "  (proposals $P1 and $P2)"
+
+check 403 "freelancer accepts"             -X PUT "$BASE/api/proposals/$P1/accept" "${AUTH_1[@]}"
+check 403 "OTHER CLIENT accepts"           -X PUT "$BASE/api/proposals/$P1/accept" "${AUTH_B[@]}"
+check 401 "anonymous accepts"              -X PUT "$BASE/api/proposals/$P1/accept"
+check 404 "accept missing proposal"        -X PUT "$BASE/api/proposals/999999/accept" "${AUTH_A[@]}"
+check 400 "accept with bad path id"        -X PUT "$BASE/api/proposals/abc/accept" "${AUTH_A[@]}"
+check 200 "OWNER accepts proposal 1"       -X PUT "$BASE/api/proposals/$P1/accept" "${AUTH_A[@]}"
+check 409 "accept the same one again"      -X PUT "$BASE/api/proposals/$P1/accept" "${AUTH_A[@]}"
+check 409 "accept the OTHER proposal"      -X PUT "$BASE/api/proposals/$P2/accept" "${AUTH_A[@]}"
+
+echo "  after accepting:"
+check 200 "project dropped from open listing" "$BASE/api/projects?category=Smoke$R" "${AUTH_A[@]}"
+echo "    open listing for this category → $(get "$BASE/api/projects?category=Smoke$R" "${AUTH_A[@]}")  (should be [], project is now in_progress)"
+echo "    proposals→ $(get "$BASE/api/projects/$PID/proposals" "${AUTH_A[@]}" | grep -o '"status":"[a-z]*"' | tr '\n' ' ')"
+check 409 "new proposal on in_progress project" -X POST "$BASE/api/projects/$PID/proposals" "${AUTH_1[@]}" "${JSON[@]}" -d "$PROP"
 
 echo
 printf '\033[1m%d passed, %d failed\033[0m\n' "$pass" "$fail"

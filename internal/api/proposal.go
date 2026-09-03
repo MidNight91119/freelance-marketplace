@@ -142,3 +142,64 @@ func (server *Server) listProposalsByProject(w http.ResponseWriter, r *http.Requ
 
 	writeJSON(w, http.StatusOK, rsp)
 }
+
+func (server *Server) acceptProposal(w http.ResponseWriter, r *http.Request) {
+	proposalId, err := strconv.ParseInt(r.PathValue("proposalId"), 10, 64)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "INVALID_REQUEST", "invalid proposal id")
+		return
+	}
+
+	payload, ok := payloadFrom(r)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "invalid or expired access token")
+		return
+	}
+
+	proposal, err := server.store.GetProposal(r.Context(), proposalId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			writeError(w, http.StatusNotFound, "PROPOSAL_NOT_FOUND", "does not exist")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+		return
+	}
+
+	project, err := server.store.GetProject(r.Context(), proposal.ProjectID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+		return
+	}
+
+	if project.ClientID != payload.UserID {
+		writeError(w, http.StatusForbidden, "FORBIDDEN", "project does not belong to you")
+		return
+	}
+
+	if project.Status != db.ProjectStatusOpen {
+		writeError(w, http.StatusConflict, "PROJECT_NOT_OPEN", "project is not open")
+		return
+	}
+
+	if proposal.Status != db.ProposalStatusPending {
+		writeError(w, http.StatusConflict, "PROPOSAL_ALREADY_PROCESSED", "proposal already processed")
+		return
+	}
+
+	arg := db.AcceptProposalTxParams{
+		ProposalID: proposalId,
+	}
+	result, err := server.store.AcceptProposalTx(r.Context(), arg)
+	if err != nil {
+		pgErr, ok := errors.AsType[*pgconn.PgError](err)
+		if ok && pgErr.ConstraintName == "one_contract_per_project" {
+			writeError(w, http.StatusConflict, "PROPOSAL_ALREADY_PROCESSED", "proposal already processed")
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, result)
+}
