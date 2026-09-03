@@ -10,6 +10,49 @@ import (
 	"time"
 )
 
+type ContractStatus string
+
+const (
+	ContractStatusActive    ContractStatus = "active"
+	ContractStatusCompleted ContractStatus = "completed"
+	ContractStatusCancelled ContractStatus = "cancelled"
+)
+
+func (e *ContractStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ContractStatus(s)
+	case string:
+		*e = ContractStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ContractStatus: %T", src)
+	}
+	return nil
+}
+
+type NullContractStatus struct {
+	ContractStatus ContractStatus `json:"contractStatus"`
+	Valid          bool           `json:"valid"` // Valid is true if ContractStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullContractStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ContractStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ContractStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullContractStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ContractStatus), nil
+}
+
 type ProjectStatus string
 
 const (
@@ -137,6 +180,18 @@ func (ns NullRoles) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.Roles), nil
+}
+
+type Contract struct {
+	ID           int64          `json:"id"`
+	ProjectID    int64          `json:"projectId"`
+	ProposalID   int64          `json:"proposalId"`
+	ClientID     int64          `json:"clientId"`
+	FreelancerID int64          `json:"freelancerId"`
+	Amount       int64          `json:"amount"`
+	Status       ContractStatus `json:"status"`
+	CreatedAt    time.Time      `json:"createdAt"`
+	UpdatedAt    time.Time      `json:"updatedAt"`
 }
 
 type Project struct {

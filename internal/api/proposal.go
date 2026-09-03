@@ -18,7 +18,6 @@ type createProposalRequest struct {
 	EstimatedDurationDays int64  `json:"estimatedDuration" validate:"required,gt=0"`
 }
 
-// matches the field list the spec defines for GET /api/projects/:projectId/proposals
 type proposalResponse struct {
 	ProposalID        int64     `json:"proposalId"`
 	FreelancerID      int64     `json:"freelancerId"`

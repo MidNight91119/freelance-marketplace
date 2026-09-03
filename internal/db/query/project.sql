@@ -27,3 +27,9 @@ ORDER BY p.created_at DESC;
 SELECT * FROM projects
 WHERE id = $1
 LIMIT 1;
+
+-- name: UpdateProjectStatus :one
+UPDATE projects
+SET status = $2, updated_at = now()
+WHERE id = $1
+RETURNING *;

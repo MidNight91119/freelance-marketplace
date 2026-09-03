@@ -10,6 +10,30 @@ import (
 	"time"
 )
 
+const acceptProposal = `-- name: AcceptProposal :one
+UPDATE proposals
+SET status = 'accepted', updated_at = now()
+WHERE id = $1
+RETURNING id, project_id, freelancer_id, cover_letter, proposed_price, estimated_duration_days, status, created_at, updated_at
+`
+
+func (q *Queries) AcceptProposal(ctx context.Context, id int64) (Proposal, error) {
+	row := q.db.QueryRow(ctx, acceptProposal, id)
+	var i Proposal
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.FreelancerID,
+		&i.CoverLetter,
+		&i.ProposedPrice,
+		&i.EstimatedDurationDays,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const createProposal = `-- name: CreateProposal :one
 INSERT INTO "proposals" (
   project_id,
@@ -38,6 +62,29 @@ func (q *Queries) CreateProposal(ctx context.Context, arg CreateProposalParams) 
 		arg.ProposedPrice,
 		arg.EstimatedDurationDays,
 	)
+	var i Proposal
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.FreelancerID,
+		&i.CoverLetter,
+		&i.ProposedPrice,
+		&i.EstimatedDurationDays,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getProposal = `-- name: GetProposal :one
+SELECT id, project_id, freelancer_id, cover_letter, proposed_price, estimated_duration_days, status, created_at, updated_at FROM proposals
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetProposal(ctx context.Context, id int64) (Proposal, error) {
+	row := q.db.QueryRow(ctx, getProposal, id)
 	var i Proposal
 	err := row.Scan(
 		&i.ID,
@@ -103,4 +150,20 @@ func (q *Queries) ListProposalsByProject(ctx context.Context, projectID int64) (
 		return nil, err
 	}
 	return items, nil
+}
+
+const rejectOtherProposals = `-- name: RejectOtherProposals :exec
+UPDATE proposals
+SET status = 'rejected', updated_at = now()
+WHERE project_id = $1 AND id <> $2
+`
+
+type RejectOtherProposalsParams struct {
+	ProjectID int64 `json:"projectId"`
+	ID        int64 `json:"id"`
+}
+
+func (q *Queries) RejectOtherProposals(ctx context.Context, arg RejectOtherProposalsParams) error {
+	_, err := q.db.Exec(ctx, rejectOtherProposals, arg.ProjectID, arg.ID)
+	return err
 }

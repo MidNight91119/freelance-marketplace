@@ -41,6 +41,51 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
+// AcceptProposal mocks base method.
+func (m *MockStore) AcceptProposal(ctx context.Context, id int64) (db.Proposal, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AcceptProposal", ctx, id)
+	ret0, _ := ret[0].(db.Proposal)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AcceptProposal indicates an expected call of AcceptProposal.
+func (mr *MockStoreMockRecorder) AcceptProposal(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AcceptProposal", reflect.TypeOf((*MockStore)(nil).AcceptProposal), ctx, id)
+}
+
+// AcceptProposalTx mocks base method.
+func (m *MockStore) AcceptProposalTx(ctx context.Context, arg db.AcceptProposalTxParams) (db.AcceptProposalTxResult, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AcceptProposalTx", ctx, arg)
+	ret0, _ := ret[0].(db.AcceptProposalTxResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AcceptProposalTx indicates an expected call of AcceptProposalTx.
+func (mr *MockStoreMockRecorder) AcceptProposalTx(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AcceptProposalTx", reflect.TypeOf((*MockStore)(nil).AcceptProposalTx), ctx, arg)
+}
+
+// CreateContract mocks base method.
+func (m *MockStore) CreateContract(ctx context.Context, arg db.CreateContractParams) (db.Contract, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateContract", ctx, arg)
+	ret0, _ := ret[0].(db.Contract)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateContract indicates an expected call of CreateContract.
+func (mr *MockStoreMockRecorder) CreateContract(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateContract", reflect.TypeOf((*MockStore)(nil).CreateContract), ctx, arg)
+}
+
 // CreateProject mocks base method.
 func (m *MockStore) CreateProject(ctx context.Context, arg db.CreateProjectParams) (db.Project, error) {
 	m.ctrl.T.Helper()
@@ -101,6 +146,21 @@ func (mr *MockStoreMockRecorder) GetProject(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProject", reflect.TypeOf((*MockStore)(nil).GetProject), ctx, id)
 }
 
+// GetProposal mocks base method.
+func (m *MockStore) GetProposal(ctx context.Context, id int64) (db.Proposal, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProposal", ctx, id)
+	ret0, _ := ret[0].(db.Proposal)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProposal indicates an expected call of GetProposal.
+func (mr *MockStoreMockRecorder) GetProposal(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProposal", reflect.TypeOf((*MockStore)(nil).GetProposal), ctx, id)
+}
+
 // GetUserByEmail mocks base method.
 func (m *MockStore) GetUserByEmail(ctx context.Context, email string) (db.User, error) {
 	m.ctrl.T.Helper()
@@ -144,4 +204,33 @@ func (m *MockStore) ListProposalsByProject(ctx context.Context, projectID int64)
 func (mr *MockStoreMockRecorder) ListProposalsByProject(ctx, projectID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProposalsByProject", reflect.TypeOf((*MockStore)(nil).ListProposalsByProject), ctx, projectID)
+}
+
+// RejectOtherProposals mocks base method.
+func (m *MockStore) RejectOtherProposals(ctx context.Context, arg db.RejectOtherProposalsParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RejectOtherProposals", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RejectOtherProposals indicates an expected call of RejectOtherProposals.
+func (mr *MockStoreMockRecorder) RejectOtherProposals(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RejectOtherProposals", reflect.TypeOf((*MockStore)(nil).RejectOtherProposals), ctx, arg)
+}
+
+// UpdateProjectStatus mocks base method.
+func (m *MockStore) UpdateProjectStatus(ctx context.Context, arg db.UpdateProjectStatusParams) (db.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateProjectStatus", ctx, arg)
+	ret0, _ := ret[0].(db.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateProjectStatus indicates an expected call of UpdateProjectStatus.
+func (mr *MockStoreMockRecorder) UpdateProjectStatus(ctx, arg any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProjectStatus", reflect.TypeOf((*MockStore)(nil).UpdateProjectStatus), ctx, arg)
 }
