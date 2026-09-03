@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createContract = `-- name: CreateContract :one
@@ -50,4 +51,66 @@ func (q *Queries) CreateContract(ctx context.Context, arg CreateContractParams) 
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const listContractsByUser = `-- name: ListContractsByUser :many
+SELECT
+  c.id, c.project_id, c.proposal_id, c.client_id, c.freelancer_id, c.amount, c.status, c.created_at, c.updated_at,
+  p.title AS project_title,
+  cl.name AS client_name,
+  f.name AS freelancer_name
+FROM "contracts" c
+JOIN projects p ON p.id = c.project_id
+JOIN users cl ON cl.id = c.client_id
+JOIN users f ON f.id = c.freelancer_id
+WHERE c.client_id = $1 OR c.freelancer_id = $1
+ORDER BY c.created_at DESC
+`
+
+type ListContractsByUserRow struct {
+	ID             int64          `json:"id"`
+	ProjectID      int64          `json:"projectId"`
+	ProposalID     int64          `json:"proposalId"`
+	ClientID       int64          `json:"clientId"`
+	FreelancerID   int64          `json:"freelancerId"`
+	Amount         int64          `json:"amount"`
+	Status         ContractStatus `json:"status"`
+	CreatedAt      time.Time      `json:"createdAt"`
+	UpdatedAt      time.Time      `json:"updatedAt"`
+	ProjectTitle   string         `json:"projectTitle"`
+	ClientName     string         `json:"clientName"`
+	FreelancerName string         `json:"freelancerName"`
+}
+
+func (q *Queries) ListContractsByUser(ctx context.Context, clientID int64) ([]ListContractsByUserRow, error) {
+	rows, err := q.db.Query(ctx, listContractsByUser, clientID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListContractsByUserRow{}
+	for rows.Next() {
+		var i ListContractsByUserRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProjectID,
+			&i.ProposalID,
+			&i.ClientID,
+			&i.FreelancerID,
+			&i.Amount,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ProjectTitle,
+			&i.ClientName,
+			&i.FreelancerName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
