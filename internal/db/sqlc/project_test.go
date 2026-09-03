@@ -25,7 +25,7 @@ func createRandomProject(t *testing.T) Project {
 		Deadline:    time.Now().AddDate(0, 0, 7),
 	}
 
-	project, err := testQueries.CreateProject(context.Background(), arg)
+	project, err := testStore.CreateProject(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, project)
 
@@ -83,7 +83,7 @@ func TestCreateProjectConstraints(t *testing.T) {
 				Deadline:    tc.deadline,
 			}
 
-			_, err := testQueries.CreateProject(context.Background(), arg)
+			_, err := testStore.CreateProject(context.Background(), arg)
 			require.Error(t, err)
 
 			pgErr, ok := errors.AsType[*pgconn.PgError](err)

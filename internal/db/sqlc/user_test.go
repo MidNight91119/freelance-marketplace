@@ -10,15 +10,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createRandomUser(t *testing.T) User {
+func createRandomUserWithRole(t *testing.T, role Roles) User {
 	arg := CreateUserParams{
 		Name:           util.RandomName(),
 		Email:          util.RandomEmail(),
 		HashedPassword: util.RandomString(8),
-		Role:           randomRole(),
+		Role:           role,
 	}
 
-	user, err := testQueries.CreateUser(context.Background(), arg)
+	user, err := testStore.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
@@ -29,6 +29,10 @@ func createRandomUser(t *testing.T) User {
 	require.NotZero(t, user.CreatedAt)
 
 	return user
+}
+
+func createRandomUser(t *testing.T) User {
+	return createRandomUserWithRole(t, randomRole())
 }
 
 func TestCreateUser(t *testing.T) {
@@ -46,7 +50,7 @@ func TestCreateUserDuplicateEmail(t *testing.T) {
 		Role:           randomRole(),
 	}
 
-	_, err := testQueries.CreateUser(context.Background(), arg)
+	_, err := testStore.CreateUser(context.Background(), arg)
 	require.ErrorAs(t, err, &pgErr)
 	require.Equal(t, UniqueViolation, pgErr.Code)
 }
