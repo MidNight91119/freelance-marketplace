@@ -2,3 +2,7 @@ CLAUDE.md
 PROJECT.md
 
 app.env
+dbml-error.log
+node_modules/
+
+.vscode
