@@ -16,9 +16,11 @@ function Header(props: { title: string }) {
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError("");
 
     const res = await fetch("http://localhost:8080/api/auth/login", {
       method: "POST",
@@ -30,7 +32,12 @@ function Login() {
     });
 
     const data = await res.json();
-    console.log(data, res.status);
+    if (!res.ok) {
+      setError(data.message);
+      return;
+    }
+
+    console.log("logged in", data.accessToken);
   }
 
   return (
@@ -46,6 +53,7 @@ function Login() {
         onChange={(e) => setPassword(e.target.value)}
       />
       <button>Submit</button>
+      {error && <p>{error}</p>}
       <p>email is: {email}</p>
       <p>pwd is: {password}</p>
     </form>
