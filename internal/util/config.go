@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"time"
 
 	"github.com/spf13/viper"
@@ -18,11 +19,18 @@ func LoadConfig(path string) (config Config, err error) {
 	viper.SetConfigName("app")
 	viper.SetConfigType("env")
 
+	viper.BindEnv("DB_SOURCE")
+	viper.BindEnv("SERVER_ADDRESS")
+	viper.BindEnv("TOKEN_SYMMETRIC_KEY")
+	viper.BindEnv("ACCESS_TOKEN_DURATION")
+
 	viper.AutomaticEnv()
 
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
+	if err = viper.ReadInConfig(); err != nil {
+		var notFound viper.ConfigFileNotFoundError
+		if !errors.As(err, &notFound) {
+			return
+		}
 	}
 
 	err = viper.Unmarshal(&config)
