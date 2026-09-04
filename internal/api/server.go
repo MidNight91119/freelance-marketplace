@@ -60,5 +60,5 @@ func (server *Server) setupRouter() {
 }
 
 func (server *Server) Start(address string) error {
-	return http.ListenAndServe(address, server.router)
+	return http.ListenAndServe(address, server.corsMiddleware(server.router))
 }

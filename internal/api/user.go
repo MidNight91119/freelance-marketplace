@@ -39,17 +39,6 @@ func newUserResponse(user db.User) userResponse {
 	}
 }
 
-type loginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
-}
-
-type loginResponse struct {
-	AccessToken          string       `json:"accessToken"`
-	AccessTokenExpiresAt time.Time    `json:"accessTokenExp"`
-	User                 userResponse `json:"user"`
-}
-
 func (server *Server) signup(w http.ResponseWriter, r *http.Request) {
 	var req signupRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -90,6 +79,17 @@ func (server *Server) signup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusCreated, newUserResponse(user))
+}
+
+type loginRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+type loginResponse struct {
+	AccessToken          string       `json:"accessToken"`
+	AccessTokenExpiresAt time.Time    `json:"accessTokenExp"`
+	User                 userResponse `json:"user"`
 }
 
 func (server *Server) login(w http.ResponseWriter, r *http.Request) {
