@@ -42,6 +42,7 @@ function Login() {
       />
       <button>Submit</button>
       {error && <p>{error}</p>}
+
       <p>email is: {email}</p>
       <p>pwd is: {password}</p>
     </form>
