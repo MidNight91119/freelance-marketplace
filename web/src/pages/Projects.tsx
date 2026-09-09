@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 function Projects() {
   type Project = {
@@ -8,6 +9,7 @@ function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function load() {
@@ -23,14 +25,19 @@ function Projects() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.message);
-        console.log(data.message);
+
+        if (res.status == 401) {
+          localStorage.removeItem("token");
+          navigate("/login");
+        }
+
         return;
       }
       setProjects(data);
       console.log(data);
     }
     load();
-  }, []);
+  }, [navigate]);
 
   return (
     <>
