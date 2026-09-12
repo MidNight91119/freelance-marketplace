@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 function Projects() {
   type Project = {
@@ -44,6 +44,9 @@ function Projects() {
       {loading && <p>Loading...</p>}
       {error && <p>{error}</p>}
       {!loading && !error && projects.length === 0 && <p>No projects</p>}
+      <div>
+        <Link to="/projects/new">Create new project</Link>
+      </div>
       <ul>
         {projects.map((p) => (
           <li key={p.id}>{p.title}</li>

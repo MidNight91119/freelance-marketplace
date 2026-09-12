@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router";
 import Login from "./pages/Login";
 import Projects from "./pages/Projects";
 import Signup from "./pages/Signup";
+import CreateProject from "./pages/CreateProject.tsx";
 
 function App() {
   return (
@@ -15,6 +16,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Projects />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/new"
+          element={
+            <ProtectedRoute>
+              <CreateProject />
             </ProtectedRoute>
           }
         />
