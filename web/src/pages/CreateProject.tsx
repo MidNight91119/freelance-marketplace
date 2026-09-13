@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { api } from "../api";
 
 function CreateProject() {
   const [title, setTitle] = useState("");
@@ -15,34 +16,23 @@ function CreateProject() {
     e.preventDefault();
     setError("");
 
-    const res = await fetch("http://localhost:8080/api/projects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({
-        title: title,
-        description: description,
-        category: category,
-        deadline: deadline,
-        budgetMin: budgetMin,
-        budgetMax: budgetMax,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setError(data.message);
-      if (res.status == 401) {
-        localStorage.removeItem("token");
-        navigate("/login");
-      }
-      return;
+    try {
+      await api("/api/projects", {
+        method: "POST",
+        body: JSON.stringify({
+          title: title,
+          description: description,
+          category: category,
+          deadline: deadline,
+          budgetMin: budgetMin,
+          budgetMax: budgetMax,
+        }),
+      });
+      navigate("/projects");
+      //   console.log(data);
+    } catch (err) {
+      setError((err as Error).message);
     }
-
-    navigate("/projects");
   }
 
   return (

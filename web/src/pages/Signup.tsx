@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
+import { api } from "../api";
 
 function Signup() {
   const [name, setName] = useState("");
@@ -13,25 +14,21 @@ function Signup() {
     e.preventDefault();
     setError("");
 
-    const res = await fetch("http://localhost:8080/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: name,
-        email: email,
-        password: password,
-        role: role,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      setError(data.message);
-      return;
+    try {
+      await api("/api/auth/signup", {
+        method: "POST",
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          password: password,
+          role: role,
+        }),
+      });
+      //   console.log(data);
+      navigate("/login");
+    } catch (err) {
+      setError((err as Error).message);
     }
-
-    navigate("/login");
   }
 
   return (
