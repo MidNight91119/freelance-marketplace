@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Projects from "./pages/Projects";
 import Signup from "./pages/Signup";
 import CreateProject from "./pages/CreateProject.tsx";
+import SubmitProposal from "./pages/SubmitProposal.tsx";
 
 function App() {
   return (
@@ -25,6 +26,14 @@ function App() {
             <ProtectedRoute>
               <CreateProject />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:projectId/propose"
+          element={
+            // <ProtectedRoute>
+            <SubmitProposal />
+            // </ProtectedRoute>
           }
         />
       </Routes>

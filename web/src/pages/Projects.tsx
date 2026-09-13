@@ -36,7 +36,9 @@ function Projects() {
       </div>
       <ul>
         {projects.map((p) => (
-          <li key={p.id}>{p.title}</li>
+          <li key={p.id}>
+            {p.title} <Link to={`/projects/${p.id}/propose`}>Propose</Link>
+          </li>
         ))}
       </ul>
     </>
