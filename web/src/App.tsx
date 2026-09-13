@@ -4,6 +4,7 @@ import Projects from "./pages/Projects";
 import Signup from "./pages/Signup";
 import CreateProject from "./pages/CreateProject.tsx";
 import SubmitProposal from "./pages/SubmitProposal.tsx";
+import ViewProposal from "./pages/ViewProposal.tsx";
 
 function App() {
   return (
@@ -31,9 +32,17 @@ function App() {
         <Route
           path="/projects/:projectId/propose"
           element={
-            // <ProtectedRoute>
-            <SubmitProposal />
-            // </ProtectedRoute>
+            <ProtectedRoute>
+              <SubmitProposal />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:projectId/proposals"
+          element={
+            <ProtectedRoute>
+              <ViewProposal />
+            </ProtectedRoute>
           }
         />
       </Routes>

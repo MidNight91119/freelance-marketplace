@@ -38,6 +38,10 @@ function Projects() {
         {projects.map((p) => (
           <li key={p.id}>
             {p.title} <Link to={`/projects/${p.id}/propose`}>Propose</Link>
+            <div>
+              <Link to={`/projects/${p.id}/proposals`}>View Proposals</Link>
+            </div>
+            <br />
           </li>
         ))}
       </ul>
