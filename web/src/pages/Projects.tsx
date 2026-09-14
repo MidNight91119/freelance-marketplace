@@ -10,6 +10,7 @@ function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     async function load() {
@@ -32,14 +33,21 @@ function Projects() {
       {error && <p>{error}</p>}
       {!loading && !error && projects.length === 0 && <p>No projects</p>}
       <div>
-        <Link to="/projects/new">Create new project</Link>
+        {role === "client" && (
+          <Link to="/projects/new">Create new project</Link>
+        )}
       </div>
       <ul>
         {projects.map((p) => (
           <li key={p.id}>
-            {p.title} <Link to={`/projects/${p.id}/propose`}>Propose</Link>
+            <div>{p.title}</div>
+            {role === "freelancer" && (
+              <Link to={`/projects/${p.id}/propose`}>Propose</Link>
+            )}
             <div>
-              <Link to={`/projects/${p.id}/proposals`}>View Proposals</Link>
+              {role === "client" && (
+                <Link to={`/projects/${p.id}/proposals`}>View Proposals</Link>
+              )}
             </div>
             <br />
           </li>

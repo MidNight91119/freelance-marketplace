@@ -24,7 +24,7 @@ function App() {
         <Route
           path="/projects/new"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="client">
               <CreateProject />
             </ProtectedRoute>
           }
@@ -32,7 +32,7 @@ function App() {
         <Route
           path="/projects/:projectId/propose"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="freelancer">
               <SubmitProposal />
             </ProtectedRoute>
           }
@@ -40,7 +40,7 @@ function App() {
         <Route
           path="/projects/:projectId/proposals"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="client">
               <ViewProposal />
             </ProtectedRoute>
           }
@@ -54,11 +54,22 @@ function Header(props: { title: string }) {
   return <h1>{props.title}</h1>;
 }
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function ProtectedRoute({
+  children,
+  role,
+}: {
+  children: React.ReactNode;
+  role?: "client" | "freelancer";
+}) {
   const token = localStorage.getItem("token");
 
   if (!token) {
     return <Navigate to="/login" replace />;
+  }
+
+  const userRole = localStorage.getItem("role");
+  if (role && userRole !== role) {
+    return <Navigate to="/projects" replace />;
   }
 
   return children;

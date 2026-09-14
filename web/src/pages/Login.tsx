@@ -21,6 +21,7 @@ function Login() {
         }),
       });
       localStorage.setItem("token", data.accessToken);
+      localStorage.setItem("role", data.user.role);
       navigate("/projects");
     } catch (err) {
       setError((err as Error).message);

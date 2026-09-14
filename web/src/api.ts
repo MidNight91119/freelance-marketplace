@@ -16,6 +16,7 @@ export async function api(path: string, options: RequestInit = {}) {
   if (!res.ok) {
     if (res.status === 401 && token) {
       localStorage.removeItem("token");
+      localStorage.removeItem("role");
       window.location.href = "/login";
     }
     throw new Error(data.message);
