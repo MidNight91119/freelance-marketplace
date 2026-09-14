@@ -14,6 +14,20 @@ function ViewProposal() {
   const [error, setError] = useState("");
   const { projectId } = useParams();
   const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(0);
+
+  async function handleAccept(proposalId: number) {
+    setError("");
+
+    try {
+      await api(`/api/proposals/${proposalId}/accept`, {
+        method: "PUT",
+      });
+      setRefresh((r) => r + 1);
+    } catch (err) {
+      setError((err as Error).message);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -28,7 +42,7 @@ function ViewProposal() {
       setLoading(false);
     }
     load();
-  }, [projectId]);
+  }, [projectId, refresh]);
 
   return (
     <>
@@ -42,6 +56,9 @@ function ViewProposal() {
             <div>Proposed price: {p.proposedPrice}</div>
             <div>Estimated Duration: {p.estimatedDuration} days</div>
             <div>Status: {p.status}</div>
+            {p.status === "pending" && (
+              <button onClick={() => handleAccept(p.proposalId)}>Accept</button>
+            )}
             <br />
           </li>
         ))}
