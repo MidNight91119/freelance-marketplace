@@ -6,6 +6,7 @@ import CreateProject from "./pages/CreateProject.tsx";
 import SubmitProposal from "./pages/SubmitProposal.tsx";
 import ViewProposal from "./pages/ViewProposal.tsx";
 import Contracts from "./pages/Contracts.tsx";
+import MyProjects from "./pages/MyProjects.tsx";
 
 function App() {
   return (
@@ -51,6 +52,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Contracts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/mine"
+          element={
+            <ProtectedRoute role="client">
+              <MyProjects />
             </ProtectedRoute>
           }
         />
