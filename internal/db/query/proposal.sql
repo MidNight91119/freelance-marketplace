@@ -31,3 +31,10 @@ RETURNING *;
 UPDATE proposals
 SET status = 'rejected', updated_at = now()
 WHERE project_id = $1 AND id <> $2;
+
+-- name: ListProposalsByFreelancer :many
+SELECT pr.*, p.title AS project_title 
+FROM proposals pr
+JOIN projects p ON p.id = pr.project_id
+WHERE pr.freelancer_id = $1
+ORDER BY pr.created_at DESC;

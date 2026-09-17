@@ -162,6 +162,28 @@ else
   printf '  \033[32m✓\033[0m     client B does not see client A'"'"'s project\n'; pass=$((pass+1))
 fi
 
+echo "── my proposals (route 10) ──────────────────────────"
+check 200 "freelancer 1 lists own proposals" "$BASE/api/proposals/mine" "${AUTH_1[@]}"
+check 403 "client cannot"                    "$BASE/api/proposals/mine" "${AUTH_A[@]}"
+check 401 "anon cannot"                      "$BASE/api/proposals/mine"
+MINE_1=$(get "$BASE/api/proposals/mine" "${AUTH_1[@]}")
+MINE_2=$(get "$BASE/api/proposals/mine" "${AUTH_2[@]}")
+# each freelancer sees exactly one proposal (their own), and between them one won and one lost
+n1=$(grep -o '"proposalId":' <<<"$MINE_1" | wc -l | tr -d ' ')
+n2=$(grep -o '"proposalId":' <<<"$MINE_2" | wc -l | tr -d ' ')
+s1=$(sed -n 's/.*"status":"\([a-z]*\)".*/\1/p' <<<"$MINE_1")
+s2=$(sed -n 's/.*"status":"\([a-z]*\)".*/\1/p' <<<"$MINE_2")
+if [[ "$n1" == 1 && "$n2" == 1 ]]; then
+  printf '  \033[32m✓\033[0m     each freelancer sees exactly one proposal (their own)\n'; pass=$((pass+1))
+else
+  printf '  \033[31m✗\033[0m     scoping wrong: F1 sees %s, F2 sees %s\n' "$n1" "$n2"; fail=$((fail+1))
+fi
+if [[ "$s1 $s2" == "accepted rejected" || "$s1 $s2" == "rejected accepted" ]]; then
+  printf '  \033[32m✓\033[0m     one accepted, one rejected (F1=%s, F2=%s)\n' "$s1" "$s2"; pass=$((pass+1))
+else
+  printf '  \033[31m✗\033[0m     statuses wrong: F1=%s, F2=%s\n' "$s1" "$s2"; fail=$((fail+1))
+fi
+
 echo
 printf '\033[1m%d passed, %d failed\033[0m\n' "$pass" "$fail"
 [[ $fail -eq 0 ]]

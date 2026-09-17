@@ -203,3 +203,48 @@ func (server *Server) acceptProposal(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, result)
 }
+
+type myProposalResponse struct {
+	ProposalID        int64     `json:"proposalId"`
+	ProjectID         int64     `json:"projectId"`
+	ProjectTitle      string    `json:"projectTitle"`
+	CoverLetter       string    `json:"coverLetter"`
+	ProposedPrice     int64     `json:"proposedPrice"`
+	EstimatedDuration int64     `json:"estimatedDuration"`
+	Status            string    `json:"status"`
+	CreatedAt         time.Time `json:"createdAt"`
+}
+
+func newMyProposalResponse(row db.ListProposalsByFreelancerRow) myProposalResponse {
+	return myProposalResponse{
+		ProposalID:        row.ID,
+		ProjectID:         row.ProjectID,
+		ProjectTitle:      row.ProjectTitle,
+		CoverLetter:       row.CoverLetter,
+		ProposedPrice:     row.ProposedPrice,
+		EstimatedDuration: row.EstimatedDurationDays,
+		Status:            string(row.Status),
+		CreatedAt:         row.CreatedAt,
+	}
+}
+
+func (server *Server) listMyProposals(w http.ResponseWriter, r *http.Request) {
+	payload, ok := payloadFrom(r)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "invalid or expired access token")
+		return
+	}
+
+	rows, err := server.store.ListProposalsByFreelancer(r.Context(), payload.UserID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+		return
+	}
+
+	rsp := make([]myProposalResponse, len(rows))
+	for i, row := range rows {
+		rsp[i] = newMyProposalResponse(row)
+	}
+
+	writeJSON(w, http.StatusOK, rsp)
+}

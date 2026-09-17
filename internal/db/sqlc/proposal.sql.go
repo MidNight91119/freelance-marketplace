@@ -100,6 +100,58 @@ func (q *Queries) GetProposal(ctx context.Context, id int64) (Proposal, error) {
 	return i, err
 }
 
+const listProposalsByFreelancer = `-- name: ListProposalsByFreelancer :many
+SELECT pr.id, pr.project_id, pr.freelancer_id, pr.cover_letter, pr.proposed_price, pr.estimated_duration_days, pr.status, pr.created_at, pr.updated_at, p.title AS project_title 
+FROM proposals pr
+JOIN projects p ON p.id = pr.project_id
+WHERE pr.freelancer_id = $1
+ORDER BY pr.created_at DESC
+`
+
+type ListProposalsByFreelancerRow struct {
+	ID                    int64          `json:"id"`
+	ProjectID             int64          `json:"projectId"`
+	FreelancerID          int64          `json:"freelancerId"`
+	CoverLetter           string         `json:"coverLetter"`
+	ProposedPrice         int64          `json:"proposedPrice"`
+	EstimatedDurationDays int64          `json:"estimatedDurationDays"`
+	Status                ProposalStatus `json:"status"`
+	CreatedAt             time.Time      `json:"createdAt"`
+	UpdatedAt             time.Time      `json:"updatedAt"`
+	ProjectTitle          string         `json:"projectTitle"`
+}
+
+func (q *Queries) ListProposalsByFreelancer(ctx context.Context, freelancerID int64) ([]ListProposalsByFreelancerRow, error) {
+	rows, err := q.db.Query(ctx, listProposalsByFreelancer, freelancerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListProposalsByFreelancerRow{}
+	for rows.Next() {
+		var i ListProposalsByFreelancerRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProjectID,
+			&i.FreelancerID,
+			&i.CoverLetter,
+			&i.ProposedPrice,
+			&i.EstimatedDurationDays,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ProjectTitle,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listProposalsByProject = `-- name: ListProposalsByProject :many
 SELECT pr.id, pr.project_id, pr.freelancer_id, pr.cover_letter, pr.proposed_price, pr.estimated_duration_days, pr.status, pr.created_at, pr.updated_at, u.name AS freelancer_name
 FROM proposals pr

@@ -53,6 +53,7 @@ func (server *Server) setupRouter() {
 	mux.Handle("PUT /api/proposals/{proposalId}/accept", server.authMiddleware(server.requireRole(http.HandlerFunc(server.acceptProposal), roleClient)))
 	mux.Handle("GET /api/contracts", server.authMiddleware(http.HandlerFunc(server.listContracts)))
 	mux.Handle("GET /api/projects/mine", server.authMiddleware(server.requireRole(http.HandlerFunc(server.listMyProjects), roleClient)))
+	mux.Handle("GET /api/proposals/mine", server.authMiddleware(server.requireRole(http.HandlerFunc(server.listMyProposals), roleFreelancer)))
 
 	// only to test auth middleware
 	mux.Handle("GET /api/auth/me", server.authMiddleware(http.HandlerFunc(server.getMe)))
