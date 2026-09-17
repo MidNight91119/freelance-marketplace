@@ -33,3 +33,12 @@ UPDATE projects
 SET status = $2, updated_at = now()
 WHERE id = $1
 RETURNING *;
+
+-- name: ListProjectsByClientID :many
+SELECT p.*, u.name AS client_name, COUNT(pr.id) AS proposal_count
+FROM projects p
+JOIN users u ON u.id = p.client_id
+LEFT JOIN proposals pr ON pr.project_id = p.id
+WHERE p.client_id = $1
+GROUP BY p.id, u.name
+ORDER BY p.created_at DESC;

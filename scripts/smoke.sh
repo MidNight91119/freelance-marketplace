@@ -145,6 +145,23 @@ echo "    open listing for this category → $(get "$BASE/api/projects?category=
 echo "    proposals→ $(get "$BASE/api/projects/$PID/proposals" "${AUTH_A[@]}" | grep -o '"status":"[a-z]*"' | tr '\n' ' ')"
 check 409 "new proposal on in_progress project" -X POST "$BASE/api/projects/$PID/proposals" "${AUTH_1[@]}" "${JSON[@]}" -d "$PROP"
 
+echo "── my projects (route 9) ────────────────────────────"
+check 200 "client A lists own projects"    "$BASE/api/projects/mine" "${AUTH_A[@]}"
+check 403 "freelancer cannot"              "$BASE/api/projects/mine" "${AUTH_1[@]}"
+check 401 "anon cannot"                    "$BASE/api/projects/mine"
+MINE_A=$(get "$BASE/api/projects/mine" "${AUTH_A[@]}")
+MINE_B=$(get "$BASE/api/projects/mine" "${AUTH_B[@]}")
+if grep -q "\"id\":$PID," <<<"$MINE_A" && grep -q '"status":"in_progress"' <<<"$MINE_A"; then
+  printf '  \033[32m✓\033[0m     in_progress project still visible on owner dashboard\n'; pass=$((pass+1))
+else
+  printf '  \033[31m✗\033[0m     in_progress project missing from owner dashboard\n      %s\n' "$MINE_A"; fail=$((fail+1))
+fi
+if grep -q "\"id\":$PID," <<<"$MINE_B"; then
+  printf '  \033[31m✗\033[0m     client B can see client A'"'"'s project\n      %s\n' "$MINE_B"; fail=$((fail+1))
+else
+  printf '  \033[32m✓\033[0m     client B does not see client A'"'"'s project\n'; pass=$((pass+1))
+fi
+
 echo
 printf '\033[1m%d passed, %d failed\033[0m\n' "$pass" "$fail"
 [[ $fail -eq 0 ]]

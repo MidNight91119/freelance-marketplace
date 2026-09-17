@@ -19,6 +19,7 @@ type Querier interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	ListContractsByUser(ctx context.Context, clientID int64) ([]ListContractsByUserRow, error)
 	ListProjects(ctx context.Context, arg ListProjectsParams) ([]ListProjectsRow, error)
+	ListProjectsByClientID(ctx context.Context, clientID int64) ([]ListProjectsByClientIDRow, error)
 	ListProposalsByProject(ctx context.Context, projectID int64) ([]ListProposalsByProjectRow, error)
 	RejectOtherProposals(ctx context.Context, arg RejectOtherProposalsParams) error
 	UpdateProjectStatus(ctx context.Context, arg UpdateProjectStatusParams) (Project, error)

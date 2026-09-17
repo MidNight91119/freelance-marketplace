@@ -173,3 +173,41 @@ func (server *Server) listProjects(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, newlistProjectResponse(projects))
 }
+
+func newlistMyProjectResponse(projects []db.ListProjectsByClientIDRow) []listProjectResponse {
+	// make (not `var`) so an empty result marshals to [] rather than null
+	newProjects := make([]listProjectResponse, 0, len(projects))
+	for _, project := range projects {
+		newProjects = append(newProjects, listProjectResponse{
+			ID:            project.ID,
+			Title:         project.Title,
+			Description:   project.Description,
+			Category:      project.Category,
+			BudgetMin:     project.BudgetMin,
+			BudgetMax:     project.BudgetMax,
+			Deadline:      project.Deadline,
+			Status:        string(project.Status),
+			ClientName:    project.ClientName,
+			ProposalCount: project.ProposalCount,
+			CreatedAt:     project.CreatedAt,
+			UpdatedAt:     project.UpdatedAt,
+		})
+	}
+	return newProjects
+}
+
+func (server *Server) listMyProjects(w http.ResponseWriter, r *http.Request) {
+	payload, ok := payloadFrom(r)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "invalid or expired access token")
+		return
+	}
+
+	projects, err := server.store.ListProjectsByClientID(r.Context(), payload.UserID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "something went wrong")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, newlistMyProjectResponse(projects))
+}

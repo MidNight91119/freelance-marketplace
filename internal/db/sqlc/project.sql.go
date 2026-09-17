@@ -157,6 +157,66 @@ func (q *Queries) ListProjects(ctx context.Context, arg ListProjectsParams) ([]L
 	return items, nil
 }
 
+const listProjectsByClientID = `-- name: ListProjectsByClientID :many
+SELECT p.id, p.client_id, p.title, p.description, p.category, p.budget_min, p.budget_max, p.status, p.deadline, p.created_at, p.updated_at, u.name AS client_name, COUNT(pr.id) AS proposal_count
+FROM projects p
+JOIN users u ON u.id = p.client_id
+LEFT JOIN proposals pr ON pr.project_id = p.id
+WHERE p.client_id = $1
+GROUP BY p.id, u.name
+ORDER BY p.created_at DESC
+`
+
+type ListProjectsByClientIDRow struct {
+	ID            int64         `json:"id"`
+	ClientID      int64         `json:"clientId"`
+	Title         string        `json:"title"`
+	Description   string        `json:"description"`
+	Category      string        `json:"category"`
+	BudgetMin     int64         `json:"budgetMin"`
+	BudgetMax     int64         `json:"budgetMax"`
+	Status        ProjectStatus `json:"status"`
+	Deadline      time.Time     `json:"deadline"`
+	CreatedAt     time.Time     `json:"createdAt"`
+	UpdatedAt     time.Time     `json:"updatedAt"`
+	ClientName    string        `json:"clientName"`
+	ProposalCount int64         `json:"proposalCount"`
+}
+
+func (q *Queries) ListProjectsByClientID(ctx context.Context, clientID int64) ([]ListProjectsByClientIDRow, error) {
+	rows, err := q.db.Query(ctx, listProjectsByClientID, clientID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListProjectsByClientIDRow{}
+	for rows.Next() {
+		var i ListProjectsByClientIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ClientID,
+			&i.Title,
+			&i.Description,
+			&i.Category,
+			&i.BudgetMin,
+			&i.BudgetMax,
+			&i.Status,
+			&i.Deadline,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ClientName,
+			&i.ProposalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateProjectStatus = `-- name: UpdateProjectStatus :one
 UPDATE projects
 SET status = $2, updated_at = now()

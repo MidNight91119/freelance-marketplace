@@ -93,3 +93,7 @@ func TestCreateProjectConstraints(t *testing.T) {
 		})
 	}
 }
+
+func TestListProjectsByClientID(t *testing.T) {
+	// TODO:
+}
