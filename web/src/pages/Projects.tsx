@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { api } from "../api.ts";
+import { useAuth } from "../auth.tsx";
 
 function Projects() {
   type Project = {
@@ -10,7 +11,7 @@ function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const role = localStorage.getItem("role");
+  const { role } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [category, setCategory] = useState(searchParams.get("category") ?? "");
   const [minBudget, setMinBudget] = useState(
