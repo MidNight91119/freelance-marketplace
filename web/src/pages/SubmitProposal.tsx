@@ -23,7 +23,7 @@ function SubmitProposal() {
           estimatedDuration: estimatedDuration,
         }),
       });
-      navigate("/projects");
+      navigate("/proposals/mine");
     } catch (err) {
       setErrror((err as Error).message);
     }
