@@ -12,7 +12,7 @@ import (
 )
 
 func createRandomProject(t *testing.T) Project {
-	user := createRandomUser(t)
+	user := createRandomUserWithRole(t, RolesClient)
 
 	budgetMin := util.RandomInt(1000, 50000)
 	arg := CreateProjectParams{
@@ -95,5 +95,25 @@ func TestCreateProjectConstraints(t *testing.T) {
 }
 
 func TestListProjectsByClientID(t *testing.T) {
-	// TODO:
+	mine := createRandomProject(t)
+	other := createRandomProject(t)
+
+	projects, err := testStore.ListProjectsByClientID(context.Background(), mine.ClientID)
+	require.NoError(t, err)
+	require.Len(t, projects, 1)
+	require.Equal(t, mine.ClientID, projects[0].ClientID)
+	require.NotEqual(t, other.ClientID, projects[0].ClientID)
+
+	arg := UpdateProjectStatusParams{
+		ID:     mine.ID,
+		Status: ProjectStatusInProgress,
+	}
+	_, err = testStore.UpdateProjectStatus(context.Background(), arg)
+	require.NoError(t, err)
+
+	projects, err = testStore.ListProjectsByClientID(context.Background(), mine.ClientID)
+	require.NoError(t, err)
+	require.Len(t, projects, 1)
+	require.Equal(t, mine.ClientID, projects[0].ClientID)
+	require.Equal(t, ProjectStatusInProgress, projects[0].Status)
 }

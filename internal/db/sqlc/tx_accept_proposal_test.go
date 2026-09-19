@@ -5,27 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/MidNight91119/freelance-marketplace/internal/util"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/stretchr/testify/require"
 )
-
-func createRandomProposal(t *testing.T, projectID int64) Proposal {
-	freelancer := createRandomUserWithRole(t, RolesFreelancer)
-
-	arg := CreateProposalParams{
-		ProjectID:             projectID,
-		FreelancerID:          freelancer.ID,
-		CoverLetter:           util.RandomString(20),
-		ProposedPrice:         util.RandomInt(1000, 100000),
-		EstimatedDurationDays: util.RandomInt(1, 90),
-	}
-	proposal, err := testStore.CreateProposal(context.Background(), arg)
-	require.NoError(t, err)
-	require.NotEmpty(t, proposal)
-
-	return proposal
-}
 
 func TestAcceptProposalTx(t *testing.T) {
 	project := createRandomProject(t)
