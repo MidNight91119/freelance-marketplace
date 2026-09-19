@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { api } from "../api.ts";
 
 function Projects() {
@@ -11,13 +11,26 @@ function Projects() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const role = localStorage.getItem("role");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [category, setCategory] = useState(searchParams.get("category") ?? "");
+  const [minBudget, setMinBudget] = useState(
+    searchParams.get("minBudget") ?? "",
+  );
+  const [maxBudget, setMaxBudget] = useState(
+    searchParams.get("maxBudget") ?? "",
+  );
+
+  function handleFilter(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSearchParams({ category, minBudget, maxBudget });
+  }
 
   useEffect(() => {
     async function load() {
       setError("");
 
       try {
-        const data = await api("/api/projects");
+        const data = await api(`/api/projects?${searchParams.toString()}`);
         setProjects(data);
       } catch (err) {
         setError((err as Error).message);
@@ -25,7 +38,7 @@ function Projects() {
       setLoading(false);
     }
     load();
-  }, []);
+  }, [searchParams]);
 
   return (
     <>
@@ -36,6 +49,30 @@ function Projects() {
         {role === "client" && (
           <Link to="/projects/new">Create new project</Link>
         )}
+      </div>
+      <div>
+        <h3>Filter projects</h3>
+        <form onSubmit={handleFilter}>
+          <input
+            type="text"
+            placeholder="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="minBudget"
+            value={minBudget}
+            onChange={(e) => setMinBudget(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="maxBudget"
+            value={maxBudget}
+            onChange={(e) => setMaxBudget(e.target.value)}
+          />
+          <button>Submit</button>
+        </form>
       </div>
       <ul>
         {projects.map((p) => (
