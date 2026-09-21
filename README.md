@@ -68,7 +68,7 @@ Errors are `{ "code": "...", "message": "..." }` with a fixed vocabulary
 `PROJECT_NOT_FOUND`, `PROJECT_NOT_OPEN`, `PROPOSAL_ALREADY_EXISTS`, `PROPOSAL_NOT_FOUND`,
 `PROPOSAL_ALREADY_PROCESSED`).
 
-## **Design decisions**
+## Design decisions**
 
 - **Role checks are middleware; ownership checks are in handlers.** Role is knowable from the token alone, so
 it's route-level. Ownership needs a database read, so it can only live where the row is loaded.
