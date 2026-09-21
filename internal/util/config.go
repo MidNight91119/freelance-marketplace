@@ -12,6 +12,7 @@ type Config struct {
 	ServerAddress       string        `mapstructure:"SERVER_ADDRESS"`
 	TokenSymmetricKey   string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	FrontendOrigin      string        `mapstructure:"FRONTEND_ORIGIN"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
@@ -23,6 +24,7 @@ func LoadConfig(path string) (config Config, err error) {
 	viper.BindEnv("SERVER_ADDRESS")
 	viper.BindEnv("TOKEN_SYMMETRIC_KEY")
 	viper.BindEnv("ACCESS_TOKEN_DURATION")
+	viper.BindEnv("FRONTEND_ORIGIN")
 
 	viper.AutomaticEnv()
 

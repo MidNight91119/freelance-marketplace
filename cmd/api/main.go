@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/MidNight91119/freelance-marketplace/internal/api"
 	db "github.com/MidNight91119/freelance-marketplace/internal/db/sqlc"
@@ -28,7 +29,12 @@ func main() {
 		log.Fatal("cannot create server: ", err)
 	}
 
-	err = server.Start(config.ServerAddress)
+	addr := config.ServerAddress
+	if port := os.Getenv("PORT"); port != "" {
+		addr = ":" + port
+	}
+
+	err = server.Start(addr)
 	if err != nil {
 		log.Fatal("cannot start server: ", err)
 	}
