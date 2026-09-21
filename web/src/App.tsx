@@ -15,66 +15,68 @@ function App() {
     <>
       <Header title="Freelance Marketplace" />
       <Nav />
-      <Routes>
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/projects"
-          element={
-            <ProtectedRoute>
-              <Projects />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/projects/new"
-          element={
-            <ProtectedRoute role="client">
-              <CreateProject />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/projects/:projectId/propose"
-          element={
-            <ProtectedRoute role="freelancer">
-              <SubmitProposal />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/projects/:projectId/proposals"
-          element={
-            <ProtectedRoute role="client">
-              <ViewProposal />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/contracts"
-          element={
-            <ProtectedRoute>
-              <Contracts />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/projects/mine"
-          element={
-            <ProtectedRoute role="client">
-              <MyProjects />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/proposals/mine"
-          element={
-            <ProtectedRoute role="freelancer">
-              <MyProposals />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+      <main>
+        <Routes>
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/projects"
+            element={
+              <ProtectedRoute>
+                <Projects />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/projects/new"
+            element={
+              <ProtectedRoute role="client">
+                <CreateProject />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/projects/:projectId/propose"
+            element={
+              <ProtectedRoute role="freelancer">
+                <SubmitProposal />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/projects/:projectId/proposals"
+            element={
+              <ProtectedRoute role="client">
+                <ViewProposal />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/contracts"
+            element={
+              <ProtectedRoute>
+                <Contracts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/projects/mine"
+            element={
+              <ProtectedRoute role="client">
+                <MyProjects />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/proposals/mine"
+            element={
+              <ProtectedRoute role="freelancer">
+                <MyProposals />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </main>
     </>
   );
 }

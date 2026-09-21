@@ -43,8 +43,8 @@ function Projects() {
 
   return (
     <>
-      {loading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
+      {loading && <p className="muted">Loading...</p>}
+      {error && <p className="error">{error}</p>}
       {!loading && !error && projects.length === 0 && <p>No projects</p>}
       <div>
         {role === "client" && (
@@ -53,7 +53,7 @@ function Projects() {
       </div>
       <div>
         <h3>Filter projects</h3>
-        <form onSubmit={handleFilter}>
+        <form className="filters" onSubmit={handleFilter}>
           <input
             type="text"
             placeholder="category"
@@ -87,7 +87,6 @@ function Projects() {
                 <Link to={`/projects/${p.id}/proposals`}>View Proposals</Link>
               )}
             </div>
-            <br />
           </li>
         ))}
       </ul>

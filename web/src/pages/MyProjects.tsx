@@ -34,8 +34,8 @@ function MyProjects() {
 
   return (
     <>
-      {loading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
+      {loading && <p className="muted">Loading...</p>}
+      {error && <p className="error">{error}</p>}
       {!loading && !error && projects.length === 0 && <p>No projects</p>}
       <ul>
         {projects.map((p) => (
@@ -50,7 +50,6 @@ function MyProjects() {
             <div>Budget Min: {p.budgetMin}</div>
             <div>Budget Max: {p.budgetMax}</div>
             <div>Deadline: {p.deadline}</div>
-            <br />
           </li>
         ))}
       </ul>

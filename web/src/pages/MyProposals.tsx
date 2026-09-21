@@ -34,8 +34,8 @@ function MyProposals() {
 
   return (
     <>
-      {loading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
+      {loading && <p className="muted">Loading...</p>}
+      {error && <p className="error">{error}</p>}
       {!loading && !error && proposals.length === 0 && <p>No proposals</p>}
       <ul>
         {proposals.map((pr) => (
@@ -46,7 +46,6 @@ function MyProposals() {
             <div>Status: {pr.status}</div>
             <div>Created at: {pr.createdAt}</div>
             <div>Cover Letter: {pr.coverLetter}</div>
-            <br />
           </li>
         ))}
       </ul>

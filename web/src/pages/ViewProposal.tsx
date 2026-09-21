@@ -46,8 +46,8 @@ function ViewProposal() {
 
   return (
     <>
-      {loading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
+      {loading && <p className="muted">Loading...</p>}
+      {error && <p className="error">{error}</p>}
       {!loading && !error && proposals.length === 0 && <p>No proposals</p>}
       <ul>
         {proposals.map((p) => (
@@ -59,7 +59,6 @@ function ViewProposal() {
             {p.status === "pending" && (
               <button onClick={() => handleAccept(p.proposalId)}>Accept</button>
             )}
-            <br />
           </li>
         ))}
       </ul>

@@ -54,12 +54,11 @@ function SubmitProposal() {
             onChange={(e) => setEstimatedDuration(e.target.valueAsNumber)}
           />
         </div>
-        <br />
         <div>
           <button>Submit</button>
         </div>
       </form>
-      {error && <p>{error}</p>}
+      {error && <p className="error">{error}</p>}
     </>
   );
 }

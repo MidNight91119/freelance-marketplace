@@ -33,8 +33,8 @@ function Contracts() {
   return (
     <>
       <h1>Contracts</h1>
-      {loading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
+      {loading && <p className="muted">Loading...</p>}
+      {error && <p className="error">{error}</p>}
       {!loading && !error && contracts.length === 0 && <p>No contracts</p>}
 
       <ul>
@@ -46,7 +46,6 @@ function Contracts() {
             <div>{c.amount}</div>
             <div>{c.status}</div>
             <div>{c.createdAt}</div>
-            <br />
           </li>
         ))}
       </ul>

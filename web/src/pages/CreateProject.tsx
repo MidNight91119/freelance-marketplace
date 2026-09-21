@@ -84,12 +84,11 @@ function CreateProject() {
             onChange={(e) => setBudgetMax(e.target.valueAsNumber)}
           />
         </div>
-        <br />
         <div>
           <button>Create project</button>
         </div>
       </form>
-      {error && <p>{error}</p>}
+      {error && <p className="error">{error}</p>}
     </>
   );
 }

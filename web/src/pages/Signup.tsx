@@ -58,7 +58,7 @@ function Signup() {
         </select>
         <button>Sign up</button>
       </form>
-      {error && <p>{error}</p>}
+      {error && <p className="error">{error}</p>}
     </>
   );
 }
