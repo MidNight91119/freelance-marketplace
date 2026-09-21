@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/MidNight91119/freelance-marketplace/internal/token"
-	"github.com/MidNight91119/freelance-marketplace/internal/util"
 )
 
 type contextKey string
