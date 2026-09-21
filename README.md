@@ -3,7 +3,9 @@
 A full-stack marketplace where clients post projects, freelancers submit proposals, and accepting a proposal
 creates a contract inside a single database transaction.
 
-**Live:** frontend `<url>` · backend `<url>` *(filled in on deploy)*
+**Live:** [frontend](https://freelance-marketplace-web.onrender.com) · [backend](https://freelance-marketplace-8yz8.onrender.com)
+
+Both run on Render's free tier and sleep after 15 minutes idle — the first request after a pause takes ~30s to wake. Not a bug.
 
 Built as Project 2 of the Super30 grind. Backend is hand-written Go on the standard library; the frontend is
 React + TypeScript consuming the real API — no mock data anywhere.
