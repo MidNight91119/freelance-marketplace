@@ -26,6 +26,40 @@ proposal on the project `rejected`, the project `in_progress`, and inserts a `co
 agreed price. Any failure rolls the whole thing back — this is tested against a real Postgres, including the
 rollback path.
 
+## Architecture
+
+```mermaid
+flowchart LR
+    B[Browser<br/>React + Vite] -->|Bearer JWT| R[net/http router]
+    R --> MW[auth + role<br/>middleware]
+    MW --> H[handlers<br/>ownership checks]
+    H --> S[Store<br/>sqlc queries + transactions]
+    S --> PG[(Postgres<br/>constraints hold the invariants)]
+```
+
+**Accepting a proposal, in one transaction:**
+
+```mermaid
+sequenceDiagram
+    participant C as Client (project owner)
+    participant API as API
+    participant DB as Postgres
+    C->>API: PUT /api/proposals/{id}/accept
+    API->>API: role = client (middleware), owns the project (handler)
+    API->>DB: BEGIN
+    API->>DB: proposal → accepted
+    API->>DB: other proposals on the project → rejected
+    API->>DB: project → in_progress
+    API->>DB: insert contract (price snapshot)
+    alt every step succeeds
+        API->>DB: COMMIT
+        API-->>C: 200 + contract
+    else any step fails
+        API->>DB: ROLLBACK (nothing changed)
+        API-->>C: error code
+    end
+```
+
 ## Stack
 
 
@@ -70,7 +104,7 @@ Errors are `{ "code": "...", "message": "..." }` with a fixed vocabulary
 `PROJECT_NOT_FOUND`, `PROJECT_NOT_OPEN`, `PROPOSAL_ALREADY_EXISTS`, `PROPOSAL_NOT_FOUND`,
 `PROPOSAL_ALREADY_PROCESSED`).
 
-## Design decisions**
+## Design decisions
 
 - **Role checks are middleware; ownership checks are in handlers.** Role is knowable from the token alone, so
 it's route-level. Ownership needs a database read, so it can only live where the row is loaded.
@@ -89,7 +123,7 @@ so login/logout re-render every consumer without a navigation as a side effect.
 
 ## Schema
 
-Four tables: `users` → `projects` → `proposals` → `contracts`. See `[doc/db.dbml](doc/db.dbml)`.
+Four tables: `users` → `projects` → `proposals` → `contracts`. See [`doc/db.dbml`](doc/db.dbml).
 
 Key constraints: `UNIQUE (project_id, freelancer_id)` on proposals; `UNIQUE (project_id)` and
 `UNIQUE (proposal_id)` on contracts; `CHECK (budget_max >= budget_min)`; enums for role and every status.
